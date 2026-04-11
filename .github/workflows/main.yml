@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       
@@ -23,13 +25,32 @@ jobs:
           java-version: 17
           distribution: 'temurin'
       
+      - name: Configure Gradle mirror
+        run: |
+          cat > ~/.gradle/init.gradle <<EOF
+          allprojects {
+              repositories {
+                  maven { url 'https://maven.aliyun.com/repository/public' }
+                  maven { url 'https://maven.aliyun.com/repository/google' }
+              }
+          }
+          EOF
+      
       - name: Build APK
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
       
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-debug
-          path: app/build/outputs/apk/debug/*.apk
+      - name: Move APK to output directory
+        run: |
+          mkdir -p output
+          find . -name "*.apk" -exec cp {} output/ \;
+          ls -la output/
+      
+      - name: Commit and push APK to repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add output/*.apk
+          git commit -m "Add compiled APK" || echo "No changes to commit"
+          git push
