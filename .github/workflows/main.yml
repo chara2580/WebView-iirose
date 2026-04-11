@@ -44,7 +44,7 @@ jobs:
           EOF
           cat ~/.gradle/init.gradle
       
-      - name: Build APK (only arm64-v8a)
+      - name: Build APK
         run: |
           # 查找 gradlew 的位置
           if [ -f "gradlew" ]; then
@@ -58,8 +58,7 @@ jobs:
             exit 1
           fi
           chmod +x gradlew
-          # 固定只编译 arm64-v8a
-          ./gradlew assembleDebug --no-daemon --stacktrace -Pandroid.injected.build.abi=arm64-v8a
+          ./gradlew assembleDebug --no-daemon --stacktrace
       
       - name: Find and move APK
         run: |
@@ -72,5 +71,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add output/*.apk 2>/dev/null || echo "No APK files to add"
-          git commit -m "Add compiled APK (arm64-v8a only)" || echo "No changes to commit"
+          git commit -m "Add compiled APK" || echo "No changes to commit"
           git push
