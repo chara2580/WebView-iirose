@@ -75,12 +75,15 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          # 添加 APK 和日志文件（如果 output 目录为空，add 会失败，但用 || true 忽略）
-          git add output/*.apk gradle_build.log 2>/dev/null || true
+          
+          # 【关键修改】：使用 -f 强制添加整个 output 目录和构建日志，无视 .gitignore
+          git add -f output/ gradle_build.log || true
+          
           # 查看是否有变更
           if git diff --cached --quiet; then
-            echo "No changes to commit"
+            echo "No changes to commit - 请检查 Action 日志确认 APK 是否真的编译成功了"
           else
+            # 这里的 [skip ci] 会防止这次 push 再次触发 Action 导致死循环
             git commit -m "Update APK and build log [skip ci]"
             git push
           fi
