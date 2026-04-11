@@ -13,8 +13,8 @@ jobs:
       
       - name: Unzip
         run: |
-          unzip -o android.zip
-          rm android.zip
+          unzip -o app.zip
+          rm app.zip
           ls -la
       
       - name: Set up JDK 17
