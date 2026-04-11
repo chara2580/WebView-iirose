@@ -13,20 +13,20 @@ jobs:
       
       - name: Unzip
         run: |
-          unzip -o *.zip
-          rm *.zip
+          unzip -o android.zip
+          rm android.zip
           ls -la
       
-      - name: Build APK
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: 'temurin'
       
-      - name: Build
+      - name: Build APK
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon
       
       - name: Upload APK
         uses: actions/upload-artifact@v4
