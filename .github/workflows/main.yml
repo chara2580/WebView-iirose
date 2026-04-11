@@ -27,6 +27,7 @@ jobs:
       
       - name: Configure Gradle mirror
         run: |
+          mkdir -p ~/.gradle
           cat > ~/.gradle/init.gradle <<EOF
           allprojects {
               repositories {
@@ -34,23 +35,41 @@ jobs:
                   maven { url 'https://maven.aliyun.com/repository/google' }
               }
           }
+          buildscript {
+              repositories {
+                  maven { url 'https://maven.aliyun.com/repository/public' }
+                  maven { url 'https://maven.aliyun.com/repository/google' }
+              }
+          }
           EOF
+          cat ~/.gradle/init.gradle
       
       - name: Build APK
         run: |
+          # 查找 gradlew 的位置
+          if [ -f "gradlew" ]; then
+            echo "gradlew found in root"
+          elif [ -f "*/gradlew" ]; then
+            cd */
+            echo "Moved to $(pwd)"
+          else
+            echo "ERROR: gradlew not found"
+            find . -name "gradlew"
+            exit 1
+          fi
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --stacktrace
       
-      - name: Move APK to output directory
+      - name: Find and move APK
         run: |
           mkdir -p output
           find . -name "*.apk" -exec cp {} output/ \;
           ls -la output/
       
-      - name: Commit and push APK to repository
+      - name: Commit and push APK
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add output/*.apk
+          git add output/*.apk 2>/dev/null || echo "No APK files to add"
           git commit -m "Add compiled APK" || echo "No changes to commit"
           git push
