@@ -12,19 +12,19 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Unzip
         run: |
           unzip -o app.zip
           rm app.zip
           ls -la
-      
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: 'temurin'
-      
+
       - name: Configure Gradle mirror
         run: |
           mkdir -p ~/.gradle
@@ -43,33 +43,44 @@ jobs:
           }
           EOF
           cat ~/.gradle/init.gradle
-      
-      - name: Build APK
+
+      - name: Build APK with full logging
+        id: build
         run: |
-          # 查找 gradlew 的位置
+          # 定位 gradlew 所在目录
           if [ -f "gradlew" ]; then
-            echo "gradlew found in root"
+            GRADLE_DIR="."
           elif [ -f "*/gradlew" ]; then
-            cd */
-            echo "Moved to $(pwd)"
+            GRADLE_DIR=$(dirname $(find . -maxdepth 2 -name "gradlew" -type f | head -1))
+            cd $GRADLE_DIR
           else
             echo "ERROR: gradlew not found"
             find . -name "gradlew"
             exit 1
           fi
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
-      
-      - name: Find and move APK
+          # 将完整输出保存到日志文件（同时输出到控制台）
+          ./gradlew assembleDebug --no-daemon --stacktrace --info 2>&1 | tee $GITHUB_WORKSPACE/gradle_build.log
+
+      - name: Prepare APK (clean old and copy new)
         run: |
+          # 清空 output 目录中旧的 APK（保证只保留最新一个）
+          rm -rf output
           mkdir -p output
+          # 查找所有 APK 并复制到 output 目录（如果有多个，会全部复制，但通常只有一个）
           find . -name "*.apk" -exec cp {} output/ \;
           ls -la output/
-      
-      - name: Commit and push APK
+
+      - name: Commit and push APK + log
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add output/*.apk 2>/dev/null || echo "No APK files to add"
-          git commit -m "Add compiled APK" || echo "No changes to commit"
-          git push
+          # 添加 APK 和日志文件（如果 output 目录为空，add 会失败，但用 || true 忽略）
+          git add output/*.apk gradle_build.log 2>/dev/null || true
+          # 查看是否有变更
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update APK and build log [skip ci]"
+            git push
+          fi
