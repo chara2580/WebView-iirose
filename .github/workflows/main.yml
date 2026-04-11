@@ -1,0 +1,75 @@
+name: Unzip and Build
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Unzip
+        run: |
+          unzip -o app.zip
+          rm app.zip
+          ls -la
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'temurin'
+      
+      - name: Configure Gradle mirror
+        run: |
+          mkdir -p ~/.gradle
+          cat > ~/.gradle/init.gradle <<EOF
+          allprojects {
+              repositories {
+                  maven { url 'https://maven.aliyun.com/repository/public' }
+                  maven { url 'https://maven.aliyun.com/repository/google' }
+              }
+          }
+          buildscript {
+              repositories {
+                  maven { url 'https://maven.aliyun.com/repository/public' }
+                  maven { url 'https://maven.aliyun.com/repository/google' }
+              }
+          }
+          EOF
+          cat ~/.gradle/init.gradle
+      
+      - name: Build APK
+        run: |
+          # 查找 gradlew 的位置
+          if [ -f "gradlew" ]; then
+            echo "gradlew found in root"
+          elif [ -f "*/gradlew" ]; then
+            cd */
+            echo "Moved to $(pwd)"
+          else
+            echo "ERROR: gradlew not found"
+            find . -name "gradlew"
+            exit 1
+          fi
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+      
+      - name: Find and move APK
+        run: |
+          mkdir -p output
+          find . -name "*.apk" -exec cp {} output/ \;
+          ls -la output/
+      
+      - name: Commit and push APK
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add output/*.apk 2>/dev/null || echo "No APK files to add"
+          git commit -m "Add compiled APK" || echo "No changes to commit"
+          git push
