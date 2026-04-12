@@ -1,3 +1,3 @@
-# 比原版花园App流畅的花园App
+比原版花园App流畅的花园App
 
-## 手动升级WebView后更流畅
+手动升级WebView后更流畅
