@@ -31,8 +31,7 @@
     "androidVersionName": "1.0.12",
     "iosCustomHeaders": {},
     "androidCustomHeaders": {},
-    "version": 39,
-     "androidCacheMode": "cache_else_network"
+    "version": 39
   },
   "navigation": {
     "androidPullToRefresh": false,
