@@ -668,17 +668,16 @@ public class MainActivity extends AppCompatActivity implements Observer,
         this.fileDownloader.onAppResume();
     }
 
-@Override
-protected void onStop() {
-    super.onStop();
-    getGNApplication().mBridge.onActivityStop(this);
-    if (isRoot) {
-        // 不再主动清缓存，即使 AppConfig 要求清缓存也忽略
-        // if (AppConfig.getInstance(this).clearCache) {
-        //     this.mWebview.clearCache(true);
-        // }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        getGNApplication().mBridge.onActivityStop(this);
+        if (isRoot) {
+            if (AppConfig.getInstance(this).clearCache) {
+                this.mWebview.clearCache(true);
+            }
+        }
     }
-}
 
     @Override
     protected void onDestroy() {
@@ -900,7 +899,7 @@ protected void onStop() {
 
     @Override
     public void clearWebviewCache() {
-        // mWebview.clearCache(true); 
+        mWebview.clearCache(true);
     }
 
     @Override
