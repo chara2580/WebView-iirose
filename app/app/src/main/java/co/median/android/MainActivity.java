@@ -900,7 +900,7 @@ protected void onStop() {
 
     @Override
     public void clearWebviewCache() {
-        mWebview.clearCache(true);
+        // mWebview.clearCache(true); 
     }
 
     @Override
