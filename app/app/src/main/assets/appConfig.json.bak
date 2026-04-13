@@ -13,9 +13,7 @@
       "iphone": null,
       "ipad": null,
       "androidPhone": "portrait",
-      "androidTablet": "portrait",
-      "androidCacheMode": "cache_else_network",
-      "androidClearCache": false
+      "androidTablet": "portrait"
     },
     "nativeBridgeUrls": [],
     "languages": [],
