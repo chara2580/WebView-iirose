@@ -1113,7 +1113,7 @@ public class MainActivity extends AppCompatActivity implements Observer,
         return url1.equals(url2);
     }
 
-    private boolean onConsumeBackPress() {
+private boolean onConsumeBackPress() {
     // 执行 JS 后退（适用于 SPA 单页应用）
     mWebview.runJavascript("window.history.back();");
     return true;
