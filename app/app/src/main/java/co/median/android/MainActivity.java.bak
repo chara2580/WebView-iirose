@@ -603,26 +603,28 @@ public class MainActivity extends AppCompatActivity implements Observer,
         return getIntent().getBooleanExtra(EXTRA_WEBVIEW_WINDOW_OPEN, false);
     }
 
-    protected void onPause() {
-        super.onPause();
-        GoNativeApplication application = getGNApplication();
-        application.mBridge.onActivityPause(this);
-        this.isActivityPaused = true;
-        stopCheckingReadyStatus();
+protected void onPause() {
+    super.onPause();
+    GoNativeApplication application = getGNApplication();
+    application.mBridge.onActivityPause(this);
+    this.isActivityPaused = true;
+    stopCheckingReadyStatus();
 
-        if (this.mWebview != null && application.mBridge.pauseWebViewOnActivityPause()) {
-            this.mWebview.onPause();
-        }
+    // 【修改点】注释掉 WebView 挂起逻辑，使 WebView 在后台继续保持运行状态
+    // 注意：这会增加后台耗电，并可能提高被系统杀死的概率。
+    // if (this.mWebview != null && application.mBridge.pauseWebViewOnActivityPause()) {
+    //     this.mWebview.onPause();
+    // }
 
-        // unregister connectivity
-        if (this.connectivityReceiver != null) {
-            unregisterReceiver(this.connectivityReceiver);
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            CookieManager.getInstance().flush();
-        }
+    // unregister connectivity
+    if (this.connectivityReceiver != null) {
+        unregisterReceiver(this.connectivityReceiver);
     }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        CookieManager.getInstance().flush();
+    }
+}
 
     @Override
     protected void onStart() {

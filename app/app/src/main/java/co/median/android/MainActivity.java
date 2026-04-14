@@ -608,7 +608,7 @@ protected void onPause() {
     GoNativeApplication application = getGNApplication();
     application.mBridge.onActivityPause(this);
     this.isActivityPaused = true;
-    stopCheckingReadyStatus();
+    // stopCheckingReadyStatus(); 修改后台关闭轮询
 
     // 【修改点】注释掉 WebView 挂起逻辑，使 WebView 在后台继续保持运行状态
     // 注意：这会增加后台耗电，并可能提高被系统杀死的概率。
