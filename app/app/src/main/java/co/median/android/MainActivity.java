@@ -625,13 +625,11 @@ protected void onPause() {
         CookieManager.getInstance().flush();
     }
 
-
- // 【新增】强制恢复全局定时器，破坏任何 pauseTimers() 的效果
+    // 【新增】强制恢复全局定时器，破坏任何 pauseTimers() 的效果
     if (this.mWebview != null) {
-        this.mWebview.resumeTimers();
+        getLeanWebView().resumeTimers();
     }
 }
-
     @Override
     protected void onStart() {
         super.onStart();
