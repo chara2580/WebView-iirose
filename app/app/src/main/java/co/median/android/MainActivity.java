@@ -624,6 +624,12 @@ protected void onPause() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
         CookieManager.getInstance().flush();
     }
+
+
+ // 【新增】强制恢复全局定时器，破坏任何 pauseTimers() 的效果
+    if (this.mWebview != null) {
+        this.mWebview.resumeTimers();
+    }
 }
 
     @Override
