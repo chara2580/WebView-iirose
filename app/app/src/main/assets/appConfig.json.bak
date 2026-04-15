@@ -13,7 +13,9 @@
       "iphone": null,
       "ipad": null,
       "androidPhone": "portrait",
-      "androidTablet": "portrait"
+      "androidTablet": "portrait",
+      "androidCacheMode": "cache_else_network",
+      "androidClearCache": false
     },
     "nativeBridgeUrls": [],
     "languages": [],
@@ -342,17 +344,23 @@
     "iosTransparentNavBar": true,
     "initialZoom": null
   },
+ {
+  "general": {
+    "keepScreenOn": true,
+    "androidFullScreen": true
+  },
   "permissions": {
-    "usesGeolocation": false,
     "androidDownloadToPublicStorage": true,
     "enableWebRTCamera": true,
     "enableWebRTCMicrophone": true,
-    "iosLocationUsageDescription": "",
-    "iosCameraUsageDescription": "",
-    "iosMicrophoneUsageDescription": "",
-    "iOSATTUserTrackingDescription": "",
-    "iOSRequestATTConsentOnLoad": false
-  },
+    "androidExtraPermissions": [
+      "android.permission.WAKE_LOCK",
+      "android.permission.FOREGROUND_SERVICE",
+      "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
+    ]
+  }
+}
+
   "developmentTools": {
     "enableWebConsoleLogs": false
   },

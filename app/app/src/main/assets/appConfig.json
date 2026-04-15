@@ -21,7 +21,7 @@
     "languages": [],
     "androidPackageName": "co.median.android.pwwqzmp",
     "iosBundleId": "co.median.ios.pwwqzmp",
-    "keepScreenOn": null,
+    "keepScreenOn": true,
     "iosUserAgentAdd": "median",
     "iosForceUserAgent": "",
     "androidUserAgentAdd": "",
@@ -349,6 +349,11 @@
     "androidDownloadToPublicStorage": true,
     "enableWebRTCamera": true,
     "enableWebRTCMicrophone": true,
+    "androidExtraPermissions": [
+      "android.permission.WAKE_LOCK",
+      "android.permission.FOREGROUND_SERVICE",
+      "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
+    ],
     "iosLocationUsageDescription": "",
     "iosCameraUsageDescription": "",
     "iosMicrophoneUsageDescription": "",
