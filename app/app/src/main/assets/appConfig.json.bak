@@ -21,7 +21,7 @@
     "languages": [],
     "androidPackageName": "co.median.android.pwwqzmp",
     "iosBundleId": "co.median.ios.pwwqzmp",
-    "keepScreenOn": null,
+    "keepScreenOn": true,
     "iosUserAgentAdd": "median",
     "iosForceUserAgent": "",
     "androidUserAgentAdd": "",
@@ -344,32 +344,36 @@
     "iosTransparentNavBar": true,
     "initialZoom": null
   },
- {
-  "general": {
-    "keepScreenOn": true,
-    "androidFullScreen": true
-  },
+
   "permissions": {
+    "usesGeolocation": false,
     "androidDownloadToPublicStorage": true,
     "enableWebRTCamera": true,
     "enableWebRTCMicrophone": true,
     "androidExtraPermissions": [
-      "android.permission.WAKE_LOCK",
-      "android.permission.FOREGROUND_SERVICE",
-      "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
-    ]
-  }
-}
+  "android.permission.WAKE_LOCK",
+  "android.permission.FOREGROUND_SERVICE",
+  "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
+  "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+  "android.permission.POST_NOTIFICATIONS"
+],
 
+    "iosLocationUsageDescription": "",
+    "iosCameraUsageDescription": "",
+    "iosMicrophoneUsageDescription": "",
+    "iOSATTUserTrackingDescription": "",
+    "iOSRequestATTConsentOnLoad": false
+  },
   "developmentTools": {
     "enableWebConsoleLogs": false
   },
-  "services": {},
-  "contextMenu": {
-    "linkActions": [
-      "copyLink",
-      "openExternal"
-    ],
+  "services": {
+  "backgroundAudio": {
+    "enabled": true,
+    "title": "小小花园",
+    "message": "正在后台运行以保持连接"
+  }
+}  
     "enabled": false
   },
   "allowZoom": null,

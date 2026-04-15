@@ -344,16 +344,20 @@
     "iosTransparentNavBar": true,
     "initialZoom": null
   },
+
   "permissions": {
     "usesGeolocation": false,
     "androidDownloadToPublicStorage": true,
     "enableWebRTCamera": true,
     "enableWebRTCMicrophone": true,
     "androidExtraPermissions": [
-      "android.permission.WAKE_LOCK",
-      "android.permission.FOREGROUND_SERVICE",
-      "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
-    ],
+  "android.permission.WAKE_LOCK",
+  "android.permission.FOREGROUND_SERVICE",
+  "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
+  "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+  "android.permission.POST_NOTIFICATIONS"
+],
+
     "iosLocationUsageDescription": "",
     "iosCameraUsageDescription": "",
     "iosMicrophoneUsageDescription": "",
@@ -363,12 +367,14 @@
   "developmentTools": {
     "enableWebConsoleLogs": false
   },
-  "services": {},
+    "services": {
+    "backgroundAudio": {
+      "enabled": true,
+      "title": "小小花园",
+      "message": "正在后台运行以保持连接"
+    }
+  },
   "contextMenu": {
-    "linkActions": [
-      "copyLink",
-      "openExternal"
-    ],
     "enabled": false
   },
   "allowZoom": null,
