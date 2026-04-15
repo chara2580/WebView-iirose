@@ -367,13 +367,14 @@
   "developmentTools": {
     "enableWebConsoleLogs": false
   },
-  "services": {
-  "backgroundAudio": {
-    "enabled": true,
-    "title": "小小花园",
-    "message": "正在后台运行以保持连接"
-  }
-}  
+    "services": {
+    "backgroundAudio": {
+      "enabled": true,
+      "title": "小小花园",
+      "message": "正在后台运行以保持连接"
+    }
+  },
+  "contextMenu": {
     "enabled": false
   },
   "allowZoom": null,

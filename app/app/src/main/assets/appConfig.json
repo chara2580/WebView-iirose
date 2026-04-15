@@ -131,57 +131,9 @@
           "pagesToTrigger": "custom"
         },
         {
-          "regex": "https?://([-\\w]+\\.)*facebook\\.com.*",
-          "mode": "appbrowser",
-          "label": "Facebook",
-          "pagesToTrigger": "custom"
-        },
-        {
-          "regex": "https?://([\\-\\w]+\\.)*(twitter|x)\\.com/.*",
-          "mode": "appbrowser",
-          "label": "Twitter/X",
-          "pagesToTrigger": "custom"
-        },
-        {
-          "regex": "https?://([-\\w]+\\.)*instagram\\.com/.*",
-          "mode": "appbrowser",
-          "label": "Instagram",
-          "pagesToTrigger": "custom"
-        },
-        {
-          "regex": "https?://maps\\.google\\.com.*",
-          "mode": "appbrowser",
-          "label": "Google Maps",
-          "pagesToTrigger": "custom"
-        },
-        {
-          "regex": "https?://([-\\w]+\\.)*google\\.com/maps/search/.*",
-          "mode": "appbrowser",
-          "label": "Google Maps Search",
-          "pagesToTrigger": "custom"
-        },
-        {
-          "regex": "https?://([-\\w]+\\.)*linkedin\\.com/.*",
-          "mode": "appbrowser",
-          "label": "LinkedIn",
-          "pagesToTrigger": "custom"
-        },
-        {
-          "regex": "https?://login\\.microsoftonline\\.com.*",
-          "mode": "internal",
-          "label": "Microsoft Login",
-          "pagesToTrigger": "custom"
-        },
-        {
-          "regex": "https?:\\/\\/([-\\w]+\\.)*iirose.com(\\/.*)?$",
-          "mode": "internal",
-          "label": "All pages on my domain",
-          "pagesToTrigger": "domain"
-        },
-        {
           "regex": ".*",
-          "mode": "appbrowser",
-          "label": "All Other Links",
+          "mode": "internal",
+          "label": "全部内部打开",
           "pagesToTrigger": "all"
         }
       ],
@@ -344,20 +296,18 @@
     "iosTransparentNavBar": true,
     "initialZoom": null
   },
-
   "permissions": {
     "usesGeolocation": false,
     "androidDownloadToPublicStorage": true,
     "enableWebRTCamera": true,
     "enableWebRTCMicrophone": true,
     "androidExtraPermissions": [
-  "android.permission.WAKE_LOCK",
-  "android.permission.FOREGROUND_SERVICE",
-  "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
-  "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
-  "android.permission.POST_NOTIFICATIONS"
-],
-
+      "android.permission.WAKE_LOCK",
+      "android.permission.FOREGROUND_SERVICE",
+      "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
+      "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+      "android.permission.POST_NOTIFICATIONS"
+    ],
     "iosLocationUsageDescription": "",
     "iosCameraUsageDescription": "",
     "iosMicrophoneUsageDescription": "",
@@ -367,11 +317,12 @@
   "developmentTools": {
     "enableWebConsoleLogs": false
   },
-    "services": {
-    "backgroundAudio": {
+  "services": {
+    "persistence": {
       "enabled": true,
-      "title": "小小花园",
-      "message": "正在后台运行以保持连接"
+      "notificationTitle": "小小花园",
+      "notificationText": "正在后台保护连接中...",
+      "isPersist": true
     }
   },
   "contextMenu": {
