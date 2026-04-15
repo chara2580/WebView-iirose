@@ -1,3 +1,6 @@
+
+# 这框架不能开源，得重构了。
+
 理论上比原版花园app流畅的小小花园app
 
 框架的文档 https://docs.median.co/docs/overview 
@@ -13,4 +16,8 @@ https://file.icve.com.cn/file_doc/qdqqd/zhHMIZnx_vip.js
 
 小小花园图片上传优化.js
 https://file.icve.com.cn/file_doc/qdqqd/Nv57sFNh_vip.js
+
+
+
+#这框架不能开源，得重构了。
 
