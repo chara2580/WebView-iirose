@@ -14,3 +14,5 @@ https://file.icve.com.cn/file_doc/qdqqd/zhHMIZnx_vip.js
 小小花园图片上传优化.js
 https://file.icve.com.cn/file_doc/qdqqd/Nv57sFNh_vip.js
 
+小小花园挂机优化.js
+https://file.icve.com.cn/file_doc/qdqqd/qDstIxgn_vip.js
