@@ -7358,7 +7358,7 @@
             } catch (e) {
                 console.error("Delayed Kn error:", e);
             }
-        }, 5000); // 5000 毫秒 = 5 秒
+        }, 10000); // 10000 毫秒 = 10 秒
     },
     condition: "enableSyncChatRecord"
 }
