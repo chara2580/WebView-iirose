@@ -60,7 +60,7 @@
             if (e) try {
                 e(this.#e.getValue())
             } catch (e) {
-                console.error(e)
+                console。error(e)
             }
         }
         destroy() {
@@ -145,7 +145,7 @@
             e instanceof Text ? this.node = e : (this.node = new Text, e && this.setText(e))
         }
         getParent() {
-            return M.byElement(this.node.parentElement)
+            return M。byElement(this.node.parentElement)
         }
         setText(e) {
             this.node.data = e
@@ -264,7 +264,7 @@
                             break
                         }
                         case Array:
-                            e.addChild(k.getElement(n));
+                            e。addChild(k.getElement(n));
                             break;
                         default:
                             throw "(NList) Untractable feature types were found"
@@ -7358,11 +7358,11 @@
             } catch (e) {
                 console.error("Delayed Kn error:", e);
             }
-        }, 10000); // 10000 毫秒 = 10 秒
+        }, 5000); // 5000 毫秒 = 5 秒
     },
     condition: "enableSyncChatRecord"
 }
-,  {
+，  {
                     func: Ni,
                     condition: "enableSuperMenu"
                 }, {
