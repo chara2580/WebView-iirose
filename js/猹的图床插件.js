@@ -4,7 +4,7 @@
     const CONFIG = {
         TARGET_KEY: 'file_upload.php',
         NEW_API: 'https://img.scdn.io/api/v1.php',
-        CDN_DOMAIN: 'https://anycastimg.scdn.io',
+        CDN_DOMAIN: 'https://esaimg.cdn1.vip',
         FORMAT: 'auto',
         ORIGINAL_PREFIX: 'http://r.iirose.com/'
     };
