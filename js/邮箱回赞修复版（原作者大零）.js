@@ -1,178 +1,196 @@
 (function () {
-    console.log("【邮箱快捷回赞】正在运行");
+    console.log("【邮箱快捷回赞】全局监听版已加载 - 完美不白版");
 
-    // 字符串规范化函数：用于模糊匹配
-    function normalizeString(str) {
-        if (!str) return '';
-        // 1. NFKC 规范化（兼容全角/半角）
-        // 2. 转小写
-        // 3. 移除零宽字符、不可见控制字符（保留字母数字中文等）
-        return str.normalize('NFKC').toLowerCase()
-            .replace(/[\u200B-\u200D\uFEFF]/g, '')   // 零宽字符
-            .replace(/[\u0000-\u001F\u007F-\u009F]/g, ''); // 控制字符
+    // 全局状态
+    const uidCache = {};
+    const whoisQueue = [];
+    let isWhoisProcessing = false;
+    let isSocketHooked = false;
+
+    // 1. 注入轻量样式（只定义按钮外观和安全右边距，不改动任何容器的 display/height）
+    function injectStyles() {
+        if (document.getElementById('quick-like-styles')) return;
+        const style = document.createElement('style');
+        style.id = 'quick-like-styles';
+        style.textContent = `
+            .uid-display { color: #00a1d6; font-size: 12px; margin-left: 10px; }
+            .uid-error { color: red; }
+            .whois-btn { position: absolute; right: 40px; top: 10px; font-family: md; font-size: 18px; cursor: pointer; color: #888; }
+            .whois-btn-msg { right: 12px; }
+            .whois-btn-active { color: #ff4081 !important; }
+        `;
+        document.head.appendChild(style);
     }
 
-    // 异步获取 uid（模糊匹配），最多重试 retries 次，每次间隔 delay ms
-    // 返回真实 uid 或 '???'（表示最终未找到）
-    async function fetchUidWithRetry(cardTagName, retries = 3, delay = 200) {
-        const normCardName = normalizeString(cardTagName);
-        for (let i = 0; i < retries; i++) {
-            try {
-                const userlistL = window["Objs"]?.mapHolder?.Assets?.userlistL;
-                const userlistUid = window["Objs"]?.mapHolder?.Assets?.userlistUid;
-                if (userlistL && userlistUid && Array.isArray(userlistL)) {
-                    // 遍历查找，使用规范化比较
-                    for (let idx = 0; idx < userlistL.length; idx++) {
-                        const normUserName = normalizeString(userlistL[idx]);
-                        if (normUserName === normCardName) {
-                            const uid = userlistUid[idx];
-                            if (uid !== undefined && uid !== null) {
-                                return uid;
-                            }
-                        }
-                    }
+    // 静默拦截 socket
+    function setupSocketHook() {
+        if (isSocketHooked) return;
+        if (!window.socket || !window.socket.__onmessage) return;
+
+        const origOnMessage = window.socket.__onmessage;
+        window.socket.__onmessage = function (e) {
+            if (typeof e === 'string' && e[0] === '+' && isWhoisProcessing && whoisQueue.length > 0) {
+                const s = e.substr(1);
+                const t = s[0];
+                if (t === '2' || t === '3') {
+                    const uid = s.substr(1).split('>')[3];
+                    const task = whoisQueue.shift();
+                    
+                    if (uid) uidCache[task.name] = uid;
+                    task.resolve(uid || '???');
+                    processWhoisQueue();
+                    
+                    return; 
                 }
-            } catch (e) {
-                // 忽略错误，继续重试
             }
-            if (i < retries - 1) {
-                await new Promise(resolve => setTimeout(resolve, delay));
-            }
+            return origOnMessage.apply(this, arguments);
+        };
+        isSocketHooked = true;
+    }
+
+    function processWhoisQueue() {
+        if (whoisQueue.length === 0) {
+            isWhoisProcessing = false;
+            return;
         }
-        return '???'; // 最终未找到返回三个问号
+        setupSocketHook();
+        isWhoisProcessing = true;
+        const nextReq = whoisQueue[0];
+        window.socket.send('++' + nextReq.name);
     }
 
-    // ---------- 初始化逻辑 ----------
-    function startObserving(targetNode) {
-        const config = { attributes: true, childList: true, subtree: true };
-        const observer = new MutationObserver((mutationsList, observer) => {
-            for (const mutation of mutationsList) {
-                if (mutation.type === 'childList') {
-                    for (const node of mutation.addedNodes) {
-                        if (node instanceof HTMLElement && node.classList.contains('cardTag')) {
-                            addBtn(node);
-                        }
-                    }
+    function getUidByName(name) {
+        return new Promise(resolve => {
+            if (!name) return resolve('???');
+            const lowerName = name.trim().toLowerCase();
+
+            if (uidCache[lowerName]) return resolve(uidCache[lowerName]);
+
+            const userJson = window["Objs"]?.mapHolder?.Assets?.userJson;
+            if (userJson && userJson[lowerName]) {
+                const uid = userJson[lowerName][8];
+                if (uid) {
+                    uidCache[lowerName] = uid;
+                    return resolve(uid);
                 }
             }
-        });
-        observer.observe(targetNode, config);
-    }
 
-    function initLikeBtn() {
-        const leaveMsgHolder = document.getElementById("leaveMsgHolder");
-        if (!leaveMsgHolder) return;
-        const cardTagArr = leaveMsgHolder.querySelectorAll(".cardTag");
-        cardTagArr.forEach((cardTag) => {
-            addBtn(cardTag);
+            whoisQueue.push({ name: lowerName, resolve: resolve });
+            if (!isWhoisProcessing) {
+                processWhoisQueue();
+            }
         });
     }
 
-    function addBtn(cardTag) {
+    // 核心渲染逻辑：完全延续你最初成功的布局定位方式
+    function injectButtonsToCard(cardTag) {
+        if (cardTag.dataset.likedBtnInjected) return;
+        cardTag.dataset.likedBtnInjected = "true";
+
         const cardTagC = cardTag.querySelector(".cardTagC");
-        if (!cardTagC || cardTagC.textContent.slice(0, 8) !== "系统 : 赞了您") return;
+        const nameNode = cardTag.querySelector(".cardTagName");
+        
+        if (!cardTagC || !nameNode) return;
+        
+        const cardTagName = nameNode.innerText || nameNode.textContent;
 
-        const cardTagName = cardTag.querySelector(".cardTagName").textContent;
-
-        // 设置容器相对定位
+        // 保留你原本成功的定位设置
         cardTagC.style.position = "relative";
+        cardTagC.style.minHeight = "40px";
 
-        // 立即创建 uid 显示标签（初始显示 '???'）
         const uidSpan = document.createElement('span');
-        uidSpan.textContent = ` UID: ???`;
-        uidSpan.style.marginLeft = '8px';
-        uidSpan.style.color = '#aaa';
-        uidSpan.style.fontSize = '12px';
-        uidSpan.style.fontWeight = 'normal';
-        uidSpan.style.verticalAlign = 'middle';
+        uidSpan.className = 'uid-display';
+        uidSpan.textContent = ` UID: 获取中...`;
         cardTagC.appendChild(uidSpan);
 
-        // 异步获取真实 uid，只有获取成功才添加点赞按钮
-        fetchUidWithRetry(cardTagName, 3, 200).then(realUid => {
-            if (realUid !== '???') {
-                // 更新 UID 显示
-                uidSpan.textContent = ` UID: ${realUid}`;
+        getUidByName(cardTagName).then(uid => {
+            if (uid !== '???') {
+                uidSpan.textContent = ` UID: ${uid}`;
 
-                // 创建点赞按钮（无留言）
-                const span1 = document.createElement('span');
-                span1.classList.add('whoisTouch', 'mdi-thumb-up-outline');
-                span1.style.right = '40px';
-                span1.style.top = "24px";
-                span1.style.position = 'absolute';
-                span1.style.fontFamily = 'md';
-                span1.style.fontSize = '18px';
-                span1.style.transition = 'transform .125s';
-                span1.style.display = 'inline-block';
-                span1.style.lineHeight = '24px';
-                span1.style.verticalAlign = 'top';
-                span1.addEventListener("click", () => {
-                    window["socket"].send(`+*${realUid}`);
-                    window["_alert"]("点赞信息已发送");
-                });
-
-                // 创建带留言的点赞按钮
-                const span2 = document.createElement('span');
-                span2.classList.add('whoisTouch', 'mdi-comment-text-outline');
-                span2.style.right = '12px';
-                span2.style.top = "24px";
-                span2.style.position = 'absolute';
-                span2.style.fontFamily = 'md';
-                span2.style.fontSize = '18px';
-                span2.style.transition = 'transform .125s';
-                span2.style.display = 'inline-block';
-                span2.style.lineHeight = '24px';
-                span2.style.verticalAlign = 'top';
-                span2.addEventListener("click", () => {
-                    window["Utils"].sync(3, [window["languageArr"][7][187], 10000, ''], (content) => {
-                        if (content) {
-                            window["socket"].send(`+*${realUid} ${content}`);
-                            window["_alert"]("点赞信息已发送");
-                        }
-                    });
-                });
-
-                cardTagC.appendChild(span1);
-                cardTagC.appendChild(span2);
+                // 使用 innerHTML 批量插入（带上 data-uid 供事件委托使用）
+                cardTagC.insertAdjacentHTML('beforeend', `
+                    <span class="whoisTouch mdi-thumb-up-outline whois-btn" title="快捷点赞" data-uid="${uid}"></span>
+                    <span class="whoisTouch mdi-comment-text-outline whois-btn whois-btn-msg" title="留言并点赞" data-uid="${uid}"></span>
+                `);
+            } else {
+                uidSpan.textContent = ` UID: 查询失败`;
+                uidSpan.className = 'uid-display uid-error';
             }
-            // 若获取失败，仅保留 UID: ??? 的显示，不添加按钮
         });
     }
 
-    // ---------- 方案一：立即检查 + 监听 ----------
-    function tryInit() {
-        const existingHolder = document.getElementById('leaveMsgHolder');
-        if (existingHolder) {
-            startObserving(existingHolder);
-            initLikeBtn();
-            return true;
-        }
-        return false;
-    }
+    // 2. 事件委托：统一管理点击事件，性能更好且不占内存
+    function setupEventDelegation(holder) {
+        if (holder.dataset.eventHooked) return;
+        holder.dataset.eventHooked = "true";
 
-    // 如果已经存在，直接处理
-    if (tryInit()) {
-        return;
-    }
+        holder.addEventListener('click', (e) => {
+            const target = e.target;
+            const uid = target.dataset.uid;
+            if (!uid) return;
 
-    // 否则监听父节点等待出现
-    const parentTarget = document.getElementById('hidePanel');
-    if (!parentTarget) {
-        console.warn("【邮箱快捷回赞】未找到 hidePanel，请检查页面结构");
-        return;
-    }
-
-    const config = { childList: true, subtree: true };
-    const observer = new MutationObserver((mutationsList, obs) => {
-        for (const mutation of mutationsList) {
-            for (const node of mutation.addedNodes) {
-                if (node instanceof HTMLElement && node.id === 'leaveMsgHolder') {
-                    startObserving(node);
-                    initLikeBtn();
-                    obs.disconnect();
-                    return;
+            // 点赞按钮
+            if (target.classList.contains('whois-btn') && !target.classList.contains('whois-btn-msg')) {
+                window.socket.send(`+*${uid}`);
+                target.classList.add('whois-btn-active');
+            }
+            // 留言并点赞按钮
+            else if (target.classList.contains('whois-btn-msg')) {
+                if (window.Utils && window.Utils.sync) {
+                    window.Utils.sync(3, ["请输入附言", 10000, ''], (content) => {
+                        if (content) {
+                            window.socket.send(`+*${uid} ${content}`);
+                            target.classList.add('whois-btn-active');
+                        }
+                    });
                 }
             }
+        });
+    }
+
+    let holderObserver = null;
+    function observeMailbox(holder) {
+        if (holderObserver) return;
+        
+        injectStyles();
+        setupEventDelegation(holder);
+        
+        // 处理已有卡片
+        holder.querySelectorAll('.cardTag').forEach(injectButtonsToCard);
+        
+        // 监听新插入的卡片
+        holderObserver = new MutationObserver(mutations => {
+            mutations.forEach(m => {
+                m.addedNodes.forEach(node => {
+                    if (node.nodeType === 1) {
+                        if (node.classList.contains('cardTag')) {
+                            injectButtonsToCard(node);
+                        } else {
+                            node.querySelectorAll('.cardTag').forEach(injectButtonsToCard);
+                        }
+                    }
+                });
+            });
+        });
+        holderObserver.observe(holder, { childList: true, subtree: true });
+        console.log("【邮箱快捷回赞】已锁定信箱面板并开始监听留言");
+    }
+
+    function main() {
+        const holder = document.getElementById("leaveMsgHolder");
+        if (holder) {
+            observeMailbox(holder);
+        } else {
+            const bodyObserver = new MutationObserver((mutations, obs) => {
+                const h = document.getElementById("leaveMsgHolder");
+                if (h) {
+                    obs.disconnect(); // 找到后断开全局监听
+                    observeMailbox(h);
+                }
+            });
+            bodyObserver.observe(document.body, { childList: true, subtree: true });
         }
-    });
-    observer.observe(parentTarget, config);
+    }
+
+    main();
 })();
